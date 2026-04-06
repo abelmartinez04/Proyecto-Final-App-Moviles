@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/constants/supabase_constants.dart';
 import 'providers/book_provider.dart';
+import 'providers/auth_provider.dart';
+import 'repositories/database_repository.dart';
+import 'repositories/auth_repository.dart';
 import 'routes/app_routes.dart';
 
 void main() async {
@@ -13,17 +16,21 @@ void main() async {
     anonKey: SupabaseConstants.supabaseAnonKey,
   );
 
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
+  
+  final _authRepo = AuthRepository();
+  final _dbRepo = DatabaseRepository();
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => BookProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider(_authRepo)),
+        ChangeNotifierProvider(create: (_) => BookProvider(_dbRepo, _authRepo)),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

@@ -6,6 +6,7 @@ class BookModel {
   final String title;
   final String? description;
   final String? coverUrl;
+  final String? status;
   final DateTime createdAt;
   final List<CategoryModel>? categories;
   final List<AuthorModel>? authors;
@@ -15,6 +16,7 @@ class BookModel {
     required this.title,
     this.description,
     this.coverUrl,
+    this.status,
     required this.createdAt,
     this.categories,
     this.authors,
@@ -40,6 +42,7 @@ class BookModel {
       title: json['title'] as String,
       description: json['description'] as String?,
       coverUrl: json['cover_url'] as String?,
+      status: json['status'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       categories: categoriesList.isNotEmpty ? categoriesList : null,
       authors: authorsList.isNotEmpty ? authorsList : null,
@@ -52,6 +55,7 @@ class BookModel {
       'title': title,
       'description': description,
       'cover_url': coverUrl,
+      'status': status,
       'created_at': createdAt.toIso8601String(),
     };
   }

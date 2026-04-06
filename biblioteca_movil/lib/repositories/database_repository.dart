@@ -27,6 +27,74 @@ class DatabaseRepository {
     return (response as List).map((e) => UserBookModel.fromJson(e)).toList();
   }
 
+  // Crear un libro nuevo con autor y categoría (maneja las tablas pivote)
+  Future<BookModel> createBook({
+    required String title,
+    String? authorName,
+    String? categoryName,
+  }) async {
+    // 1. Insertar el libro
+    final bookResponse = await _client.from('books').insert({
+      'title': title,
+      'status': 'pending',
+    }).select().single();
+    final bookId = bookResponse['id'] as String;
+
+    // 2. Si hay autor, buscar o crear y vincular
+    if (authorName != null && authorName.isNotEmpty) {
+      // Upsert: inserta si no existe, ignora si ya existe
+      await _client.from('authors').upsert(
+        {'name': authorName},
+        onConflict: 'name',
+      );
+      final authorResponse = await _client
+          .from('authors')
+          .select('id')
+          .eq('name', authorName)
+          .single();
+      await _client.from('book_authors').insert({
+        'book_id': bookId,
+        'author_id': authorResponse['id'],
+      });
+    }
+
+    // 3. Si hay categoría, buscar o crear y vincular
+    if (categoryName != null && categoryName.isNotEmpty) {
+      await _client.from('categories').upsert(
+        {'name': categoryName},
+        onConflict: 'name',
+      );
+      final categoryResponse = await _client
+          .from('categories')
+          .select('id')
+          .eq('name', categoryName)
+          .single();
+      await _client.from('book_categories').insert({
+        'book_id': bookId,
+        'category_id': categoryResponse['id'],
+      });
+    }
+
+    // 4. Devolver el libro completo con relaciones
+    final fullBook = await _client
+        .from('books')
+        .select('*, authors(*), categories(*)')
+        .eq('id', bookId)
+        .single();
+    return BookModel.fromJson(fullBook);
+  }
+
+  // Actualizar el status de un libro
+  Future<BookModel> updateBookStatus(String bookId, String status) async {
+    final response = await _client
+        .from('books')
+        .update({'status': status})
+        .eq('id', bookId)
+        .select('*, authors(*), categories(*)')
+        .single();
+    return BookModel.fromJson(response);
+  }
+
   // Añadir un libro a mi lista
   Future<UserBookModel> addUserBook({
     required String userId,

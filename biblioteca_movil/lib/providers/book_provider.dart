@@ -90,4 +90,37 @@ class BookProvider extends ChangeNotifier {
       debugPrint("Error updating my book: $e");
     }
   }
+
+  // Crear un libro nuevo con autor y categoría (persiste en Supabase)
+  Future<void> addBook({
+    required String title,
+    String? authorName,
+    String? categoryName,
+  }) async {
+    try {
+      final newBook = await _dbRepo.createBook(
+        title: title,
+        authorName: authorName,
+        categoryName: categoryName,
+      );
+      _publicBooks.add(newBook);
+      notifyListeners();
+    } catch (e) {
+      debugPrint("Error adding book: $e");
+    }
+  }
+
+  // Actualizar el status de un libro público
+  Future<void> updateBookStatus(String bookId, String status) async {
+    try {
+      final updatedBook = await _dbRepo.updateBookStatus(bookId, status);
+      final index = _publicBooks.indexWhere((b) => b.id == bookId);
+      if (index != -1) {
+        _publicBooks[index] = updatedBook;
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint("Error updating book status: $e");
+    }
+  }
 }

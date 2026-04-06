@@ -22,6 +22,28 @@ class BookModel {
     this.authors,
   });
 
+  // Getters de conveniencia para compatibilidad con la UI
+  String get author => authors != null && authors!.isNotEmpty
+      ? authors!.map((a) => a.name).join(', ')
+      : 'Sin autor';
+
+  String get genre => categories != null && categories!.isNotEmpty
+      ? categories!.map((c) => c.name).join(', ')
+      : 'Sin género';
+
+  String get statusLabel {
+    switch (status) {
+      case 'read':
+        return 'Leído';
+      case 'reading':
+        return 'En progreso';
+      case 'pending':
+        return 'Pendiente';
+      default:
+        return 'Pendiente';
+    }
+  }
+
   factory BookModel.fromJson(Map<String, dynamic> json) {
     var authorsList = <AuthorModel>[];
     if (json['authors'] != null) {

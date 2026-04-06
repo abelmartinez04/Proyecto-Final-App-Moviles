@@ -39,6 +39,7 @@ class AddBookScreen extends StatelessWidget {
                   authorName: authorController.text,
                   categoryName: genreController.text,
                 );
+
                 if (context.mounted) {
                   Navigator.pop(context);
                 }

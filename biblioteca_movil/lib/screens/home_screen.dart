@@ -14,7 +14,7 @@ class HomeScreen extends StatelessWidget {
       body: provider.publicBooks.isEmpty
           ? const Center(
               child: Text(
-                "No tienes libros aún 📚",
+                "No tienes libros aún",
                 style: TextStyle(fontSize: 18),
               ),
             )
@@ -23,13 +23,6 @@ class HomeScreen extends StatelessWidget {
               itemCount: provider.publicBooks.length,
               itemBuilder: (context, index) {
                 final book = provider.publicBooks[index];
-
-                final authorText = book.authors != null && book.authors!.isNotEmpty
-                    ? book.authors!.map((a) => a.name).join(', ')
-                    : 'Sin autor';
-                final genreText = book.categories != null && book.categories!.isNotEmpty
-                    ? book.categories!.map((c) => c.name).join(', ')
-                    : 'Sin género';
 
                 return Card(
                   elevation: 4,
@@ -43,15 +36,16 @@ class HomeScreen extends StatelessWidget {
                       book.title,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text("$authorText • $genreText"),
+                    subtitle: Text("${book.author} • ${book.genre}"),
+                    
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          book.status == 'read'
+                          book.statusLabel == "Leído"
                               ? Icons.check_circle
                               : Icons.schedule,
-                          color: book.status == 'read'
+                          color: book.statusLabel == "Leído"
                               ? Colors.green
                               : Colors.orange,
                         ),
@@ -59,7 +53,7 @@ class HomeScreen extends StatelessWidget {
                         IconButton(
                           icon: const Icon(Icons.edit),
                           onPressed: () {
-                            Navigator.pushNamed(
+                           Navigator.pushNamed(
                               context,
                               '/edit',
                               arguments: book,
@@ -68,6 +62,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ],
                     ),
+
                     onTap: () {
                       Navigator.pushNamed(
                         context,

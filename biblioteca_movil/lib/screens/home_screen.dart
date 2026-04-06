@@ -14,7 +14,7 @@ class HomeScreen extends StatelessWidget {
       body: provider.books.isEmpty
           ? const Center(
               child: Text(
-                "No tienes libros aún 📚",
+                "No tienes libros aún",
                 style: TextStyle(fontSize: 18),
               ),
             )
@@ -37,16 +37,38 @@ class HomeScreen extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text("${book.author} • ${book.genre}"),
-                    trailing: Icon(
-                      book.status == "Leído"
-                          ? Icons.check_circle
-                          : Icons.schedule,
-                      color: book.status == "Leído"
-                          ? Colors.green
-                          : Colors.orange,
+                    
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          book.status == "Leído"
+                              ? Icons.check_circle
+                              : Icons.schedule,
+                          color: book.status == "Leído"
+                              ? Colors.green
+                              : Colors.orange,
+                        ),
+                        const SizedBox(width: 10),
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () {
+                           Navigator.pushNamed(
+                              context,
+                              '/edit',
+                              arguments: book,
+                            );
+                          },
+                        ),
+                      ],
                     ),
+
                     onTap: () {
-                      Navigator.pushNamed(context, '/detail');
+                      Navigator.pushNamed(
+                        context,
+                        '/detail',
+                        arguments: book,
+                      );
                     },
                   ),
                 );

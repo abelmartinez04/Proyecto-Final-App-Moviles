@@ -14,7 +14,7 @@ class DatabaseRepository {
 
   // Libros públicos
   Future<List<BookModel>> getBooks() async {
-    final response = await _client.from('books').select('*, categories(*)');
+    final response = await _client.from('books').select('*, authors(*), categories(*)');
     return (response as List).map((e) => BookModel.fromJson(e)).toList();
   }
 
@@ -22,7 +22,7 @@ class DatabaseRepository {
   Future<List<UserBookModel>> getUserBooks(String userId) async {
     final response = await _client
         .from('user_books')
-        .select('*, books(*, categories(*))')
+        .select('*, books(*, authors(*), categories(*))')
         .eq('user_id', userId);
     return (response as List).map((e) => UserBookModel.fromJson(e)).toList();
   }
@@ -39,7 +39,7 @@ class DatabaseRepository {
       'book_id': bookId,
       'status': status,
       'rating': rating,
-    }).select('*, books(*, categories(*))').single();
+    }).select('*, books(*, authors(*), categories(*))').single();
     
     return UserBookModel.fromJson(response);
   }
@@ -58,7 +58,7 @@ class DatabaseRepository {
         .from('user_books')
         .update(updates)
         .eq('id', userBookId)
-        .select('*, books(*, categories(*))')
+        .select('*, books(*, authors(*), categories(*))')
         .single();
 
     return UserBookModel.fromJson(response);

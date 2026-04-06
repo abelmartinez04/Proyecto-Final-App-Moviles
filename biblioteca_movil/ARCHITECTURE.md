@@ -38,6 +38,10 @@ Implementamos un diseño altamente normalizado y asegurado mediante RLS (Row Lev
 
 ### 2.1 Esquema SQL (ER Diagram)
 
+- **authors**
+  - `id` (UUID) [PK]
+  - `name` (TEXT)
+
 - **categories**
   - `id` (UUID) [PK]
   - `name` (TEXT)
@@ -45,9 +49,15 @@ Implementamos un diseño altamente normalizado y asegurado mediante RLS (Row Lev
 - **books**
   - `id` (UUID) [PK]
   - `title` (TEXT)
-  - `author` (TEXT)
   - `description` (TEXT)
   - `cover_url` (TEXT)
+
+- **book_authors** (Pivote M:N)
+  - `book_id` (UUID) [FK -> books]
+  - `author_id` (UUID) [FK -> authors]
+
+- **book_categories** (Pivote M:N)
+  - `book_id` (UUID) [FK -> books]
   - `category_id` (UUID) [FK -> categories]
 
 - **user_books** (Tabla Pivote Extensible)

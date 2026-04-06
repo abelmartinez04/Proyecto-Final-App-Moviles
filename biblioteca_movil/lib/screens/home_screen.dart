@@ -11,18 +11,18 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text("Mi Biblioteca"), centerTitle: true),
-      body: provider.books.isEmpty
+      body: provider.publicBooks.isEmpty
           ? const Center(
               child: Text(
-                "No tienes libros aún 📚",
+                "Buscando libros... 📚",
                 style: TextStyle(fontSize: 18),
               ),
             )
           : ListView.builder(
               padding: const EdgeInsets.all(10),
-              itemCount: provider.books.length,
+              itemCount: provider.publicBooks.length,
               itemBuilder: (context, index) {
-                final book = provider.books[index];
+                final book = provider.publicBooks[index];
 
                 return Card(
                   elevation: 4,
@@ -36,17 +36,12 @@ class HomeScreen extends StatelessWidget {
                       book.title,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text("${book.author} • ${book.genre}"),
-                    trailing: Icon(
-                      book.status == "Leído"
-                          ? Icons.check_circle
-                          : Icons.schedule,
-                      color: book.status == "Leído"
-                          ? Colors.green
-                          : Colors.orange,
-                    ),
+                    subtitle: Text(
+                        book.authors != null && book.authors!.isNotEmpty 
+                            ? book.authors!.first.name 
+                            : "Sin autor registrado"),
                     onTap: () {
-                      Navigator.pushNamed(context, '/detail');
+                      // Navigator.pushNamed(context, '/detail');
                     },
                   ),
                 );

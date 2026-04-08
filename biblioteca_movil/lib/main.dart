@@ -10,7 +10,7 @@ import 'routes/app_routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   await Supabase.initialize(
     url: SupabaseConstants.supabaseUrl,
     anonKey: SupabaseConstants.supabaseAnonKey,
@@ -21,7 +21,7 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});
-  
+
   final _authRepo = AuthRepository();
   final _dbRepo = DatabaseRepository();
 
@@ -36,6 +36,24 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         initialRoute: '/',
         routes: AppRoutes.routes,
+        theme: ThemeData(
+          primarySwatch: Colors.indigo,
+          scaffoldBackgroundColor: const Color(0xFFF5F6FA),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            centerTitle: true,
+            iconTheme: IconThemeData(color: Colors.black),
+            titleTextStyle: TextStyle(
+              color: Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          floatingActionButtonTheme: const FloatingActionButtonThemeData(
+            backgroundColor: Colors.indigo,
+          ),
+        ),
       ),
     );
   }

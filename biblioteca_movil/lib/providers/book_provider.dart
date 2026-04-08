@@ -43,7 +43,7 @@ class BookProvider extends ChangeNotifier {
   Future<void> loadUserBooks() async {
     final userId = _authRepo.currentUser?.id;
     if (userId == null) return;
-    
+
     _isLoading = true;
     notifyListeners();
     try {
@@ -56,7 +56,11 @@ class BookProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> addBookToMyList(String bookId, String status, {int? rating}) async {
+  Future<void> addBookToMyList(
+    String bookId,
+    String status, {
+    int? rating,
+  }) async {
     final userId = _authRepo.currentUser?.id;
     if (userId == null) return;
 
@@ -73,11 +77,15 @@ class BookProvider extends ChangeNotifier {
       debugPrint("Error adding book to my list: $e");
     }
   }
-  
-  Future<void> updateMyBookStatus(String userBookId, String status, {int? rating}) async {
+
+  Future<void> updateMyBookStatus(
+    String userBookId,
+    String status, {
+    int? rating,
+  }) async {
     try {
       final updatedBook = await _dbRepo.updateUserBook(
-        userBookId: userBookId, 
+        userBookId: userBookId,
         status: status,
         rating: rating,
       );
@@ -91,7 +99,6 @@ class BookProvider extends ChangeNotifier {
     }
   }
 
-  // Crear un libro nuevo con autor y categoría (persiste en Supabase)
   Future<void> addBook({
     required String title,
     String? authorName,
@@ -110,7 +117,6 @@ class BookProvider extends ChangeNotifier {
     }
   }
 
-  // Actualizar el status de un libro público
   Future<void> updateBookStatus(String bookId, String status) async {
     try {
       final updatedBook = await _dbRepo.updateBookStatus(bookId, status);
@@ -122,5 +128,31 @@ class BookProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint("Error updating book status: $e");
     }
+  }
+
+  List<BookModel> _filteredBooks = [];
+  String _searchQuery = '';
+
+  List<BookModel> get filteredBooks =>
+      _searchQuery.isEmpty ? _publicBooks : _filteredBooks;
+
+  void searchBooks(String query) {
+    _searchQuery = query.toLowerCase();
+
+    if (_searchQuery.isEmpty) {
+      _filteredBooks = [];
+    } else {
+      _filteredBooks = _publicBooks.where((book) {
+        final title = book.title.toLowerCase();
+        final author = book.author.toLowerCase();
+        final genre = book.genre.toLowerCase();
+
+        return title.contains(_searchQuery) ||
+            author.contains(_searchQuery) ||
+            genre.contains(_searchQuery);
+      }).toList();
+    }
+
+    notifyListeners();
   }
 }

@@ -11,7 +11,7 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text("Mi Biblioteca"), centerTitle: true),
-      body: provider.books.isEmpty
+      body: provider.publicBooks.isEmpty
           ? const Center(
               child: Text(
                 "No tienes libros aún",
@@ -20,9 +20,9 @@ class HomeScreen extends StatelessWidget {
             )
           : ListView.builder(
               padding: const EdgeInsets.all(10),
-              itemCount: provider.books.length,
+              itemCount: provider.publicBooks.length,
               itemBuilder: (context, index) {
-                final book = provider.books[index];
+                final book = provider.publicBooks[index];
 
                 return Card(
                   elevation: 4,
@@ -42,10 +42,10 @@ class HomeScreen extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          book.status == "Leído"
+                          book.statusLabel == "Leído"
                               ? Icons.check_circle
                               : Icons.schedule,
-                          color: book.status == "Leído"
+                          color: book.statusLabel == "Leído"
                               ? Colors.green
                               : Colors.orange,
                         ),

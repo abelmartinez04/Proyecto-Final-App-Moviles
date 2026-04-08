@@ -17,7 +17,7 @@ class _EditBookScreenState extends State<EditBookScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final book = ModalRoute.of(context)!.settings.arguments as Book;
+    final book = ModalRoute.of(context)!.settings.arguments as BookModel;
 
     titleController.text = book.title;
     authorController.text = book.author;

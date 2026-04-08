@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/book_provider.dart';
-import '../models/book_model.dart';
 
 class AddBookScreen extends StatelessWidget {
   const AddBookScreen({super.key});
@@ -34,17 +33,16 @@ class AddBookScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                provider.addBook(
-                  Book(
-                    title: titleController.text,
-                    author: authorController.text,
-                    genre: genreController.text,
-                    status: "Pendiente",
-                  ),
+              onPressed: () async {
+                await provider.addBook(
+                  title: titleController.text,
+                  authorName: authorController.text,
+                  categoryName: genreController.text,
                 );
 
-                Navigator.pop(context);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
               },
               child: const Text("Guardar"),
             )

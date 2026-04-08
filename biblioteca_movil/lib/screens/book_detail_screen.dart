@@ -6,7 +6,7 @@ class BookDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final book = ModalRoute.of(context)!.settings.arguments as Book;
+    final book = ModalRoute.of(context)!.settings.arguments as BookModel;
 
     return Scaffold(
       appBar: AppBar(
@@ -29,7 +29,7 @@ class BookDetailScreen extends StatelessWidget {
             const SizedBox(height: 10),
             Text("Género: ${book.genre}"),
             const SizedBox(height: 10),
-            Text("Estado: ${book.status}"),
+            Text("Estado: ${book.statusLabel}"),
           ],
         ),
       ),

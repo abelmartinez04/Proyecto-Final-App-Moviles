@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/book_model.dart';
 import '../models/category_model.dart';
 import '../models/user_book_model.dart';
+import 'dart:io';
 
 class DatabaseRepository {
   final SupabaseClient _client = Supabase.instance.client;
@@ -14,7 +15,9 @@ class DatabaseRepository {
 
   // Libros públicos
   Future<List<BookModel>> getBooks() async {
-    final response = await _client.from('books').select('*, authors(*), categories(*)');
+    final response = await _client
+        .from('books')
+        .select('*, authors(*), categories(*)');
     return (response as List).map((e) => BookModel.fromJson(e)).toList();
   }
 
@@ -32,55 +35,64 @@ class DatabaseRepository {
     required String title,
     String? authorName,
     String? categoryName,
+    String? coverUrl,
+    String? bookUrl,
   }) async {
-    // 1. Insertar el libro
-    final bookResponse = await _client.from('books').insert({
-      'title': title,
-      'status': 'pending',
-    }).select().single();
+    final bookResponse = await _client
+        .from('books')
+        .insert({
+          'title': title,
+          'status': 'pending',
+          'cover_url': coverUrl,
+          'book_url': bookUrl,
+        })
+        .select()
+        .single();
+
     final bookId = bookResponse['id'] as String;
 
-    // 2. Si hay autor, buscar o crear y vincular
+    // Autor
     if (authorName != null && authorName.isNotEmpty) {
-      // Upsert: inserta si no existe, ignora si ya existe
-      await _client.from('authors').upsert(
-        {'name': authorName},
-        onConflict: 'name',
-      );
+      await _client.from('authors').upsert({
+        'name': authorName,
+      }, onConflict: 'name');
+
       final authorResponse = await _client
           .from('authors')
           .select('id')
           .eq('name', authorName)
           .single();
+
       await _client.from('book_authors').insert({
         'book_id': bookId,
         'author_id': authorResponse['id'],
       });
     }
 
-    // 3. Si hay categoría, buscar o crear y vincular
+    // Categoría
     if (categoryName != null && categoryName.isNotEmpty) {
-      await _client.from('categories').upsert(
-        {'name': categoryName},
-        onConflict: 'name',
-      );
+      await _client.from('categories').upsert({
+        'name': categoryName,
+      }, onConflict: 'name');
+
       final categoryResponse = await _client
           .from('categories')
           .select('id')
           .eq('name', categoryName)
           .single();
+
       await _client.from('book_categories').insert({
         'book_id': bookId,
         'category_id': categoryResponse['id'],
       });
     }
 
-    // 4. Devolver el libro completo con relaciones
     final fullBook = await _client
         .from('books')
         .select('*, authors(*), categories(*)')
         .eq('id', bookId)
         .single();
+
     return BookModel.fromJson(fullBook);
   }
 
@@ -102,14 +114,30 @@ class DatabaseRepository {
     required String status,
     int? rating,
   }) async {
-    final response = await _client.from('user_books').insert({
-      'user_id': userId,
-      'book_id': bookId,
-      'status': status,
-      'rating': rating,
-    }).select('*, books(*, authors(*), categories(*))').single();
-    
+    final response = await _client
+        .from('user_books')
+        .insert({
+          'user_id': userId,
+          'book_id': bookId,
+          'status': status,
+          'rating': rating,
+        })
+        .select('*, books(*, authors(*), categories(*))')
+        .single();
+
     return UserBookModel.fromJson(response);
+  }
+
+  Future<String> uploadImage(File file) async {
+    final fileName = DateTime.now().millisecondsSinceEpoch.toString();
+
+    await _client.storage.from('book-covers').upload(fileName, file);
+
+    final publicUrl = _client.storage
+        .from('book-covers')
+        .getPublicUrl(fileName);
+
+    return publicUrl;
   }
 
   // Actualizar estado o rating de mi libro

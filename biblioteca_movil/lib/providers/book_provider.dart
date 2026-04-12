@@ -4,6 +4,7 @@ import '../models/category_model.dart';
 import '../models/user_book_model.dart';
 import '../repositories/database_repository.dart';
 import '../repositories/auth_repository.dart';
+import 'dart:io';
 
 class BookProvider extends ChangeNotifier {
   final DatabaseRepository _dbRepo;
@@ -103,18 +104,27 @@ class BookProvider extends ChangeNotifier {
     required String title,
     String? authorName,
     String? categoryName,
+    String? coverUrl,
+    String? bookUrl,
   }) async {
     try {
       final newBook = await _dbRepo.createBook(
         title: title,
         authorName: authorName,
         categoryName: categoryName,
+        coverUrl: coverUrl,
+        bookUrl: bookUrl,
       );
+
       _publicBooks.add(newBook);
       notifyListeners();
     } catch (e) {
       debugPrint("Error adding book: $e");
     }
+  }
+
+  Future<String> uploadImage(File file) {
+    return _dbRepo.uploadImage(file);
   }
 
   Future<void> updateBookStatus(String bookId, String status) async {

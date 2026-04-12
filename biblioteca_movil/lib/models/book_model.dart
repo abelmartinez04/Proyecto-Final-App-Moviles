@@ -8,6 +8,7 @@ class BookModel {
   final String? coverUrl;
   final String? status;
   final DateTime createdAt;
+  final String? bookUrl;
   final List<CategoryModel>? categories;
   final List<AuthorModel>? authors;
 
@@ -20,6 +21,7 @@ class BookModel {
     required this.createdAt,
     this.categories,
     this.authors,
+    this.bookUrl,
   });
 
   // Getters de conveniencia para compatibilidad con la UI
@@ -66,6 +68,7 @@ class BookModel {
       coverUrl: json['cover_url'] as String?,
       status: json['status'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
+      bookUrl: json['book_url'] as String?,
       categories: categoriesList.isNotEmpty ? categoriesList : null,
       authors: authorsList.isNotEmpty ? authorsList : null,
     );
@@ -79,6 +82,7 @@ class BookModel {
       'cover_url': coverUrl,
       'status': status,
       'created_at': createdAt.toIso8601String(),
+      'book_url': bookUrl,
     };
   }
 }

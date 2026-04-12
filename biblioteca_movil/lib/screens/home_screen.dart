@@ -18,6 +18,8 @@ class HomeScreen extends StatelessWidget {
             onPressed: () async {
               await provider.loadPublicData();
 
+              if (!context.mounted) return;
+
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text("Datos actualizados ✅")),
               );
@@ -85,12 +87,23 @@ class HomeScreen extends StatelessWidget {
                                 child: ListTile(
                                   contentPadding: const EdgeInsets.all(16),
 
-                                  leading: CircleAvatar(
-                                    backgroundColor: Colors.indigo.shade100,
-                                    child: const Icon(
-                                      Icons.menu_book,
-                                      color: Colors.indigo,
-                                    ),
+                                  // IMAGEN DEL LIBRO
+                                  leading: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child:
+                                        book.coverUrl != null &&
+                                            book.coverUrl!.isNotEmpty
+                                        ? Image.network(
+                                            book.coverUrl!,
+                                            width: 50,
+                                            height: 70,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                                  return _placeholderImage();
+                                                },
+                                          )
+                                        : _placeholderImage(),
                                   ),
 
                                   title: Text(
@@ -113,12 +126,15 @@ class HomeScreen extends StatelessWidget {
                                       Icon(
                                         book.statusLabel == "Leído"
                                             ? Icons.check_circle
-                                            : Icons.schedule,
+                                            : Icons.menu_book,
                                         color: book.statusLabel == "Leído"
                                             ? Colors.green
-                                            : Colors.orange,
+                                            : Colors.indigo,
                                       ),
+
                                       const SizedBox(width: 8),
+
+                                      // EDITAR
                                       IconButton(
                                         icon: const Icon(Icons.edit),
                                         onPressed: () {
@@ -126,6 +142,21 @@ class HomeScreen extends StatelessWidget {
                                             context,
                                             '/edit',
                                             arguments: book,
+                                          );
+                                        },
+                                      ),
+
+                                      // ELIMINAR
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.delete,
+                                          color: Colors.red,
+                                        ),
+                                        onPressed: () {
+                                          _confirmDelete(
+                                            context,
+                                            provider,
+                                            book.id,
                                           );
                                         },
                                       ),
@@ -154,6 +185,55 @@ class HomeScreen extends StatelessWidget {
         },
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  // PLACEHOLDER IMAGEN
+  Widget _placeholderImage() {
+    return Container(
+      width: 50,
+      height: 70,
+      color: Colors.indigo.shade100,
+      child: const Icon(Icons.menu_book, color: Colors.indigo),
+    );
+  }
+
+  // ELIMINACIÓN
+  void _confirmDelete(
+    BuildContext context,
+    BookProvider provider,
+    String bookId,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Eliminar libro"),
+          content: const Text("¿Seguro que quieres eliminar este libro?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancelar"),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+
+                // 👇 aquí luego conectamos con DB real
+                // await provider.deleteBook(bookId);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Libro eliminado (demo) 🗑️")),
+                );
+              },
+              child: const Text(
+                "Eliminar",
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

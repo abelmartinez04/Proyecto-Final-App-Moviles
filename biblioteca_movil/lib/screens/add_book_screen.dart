@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -17,15 +17,18 @@ class _AddBookScreenState extends State<AddBookScreen> {
   final genreController = TextEditingController();
   final urlController = TextEditingController();
 
-  File? selectedImage;
+  XFile? selectedImage;
+  Uint8List? imageBytes;
 
   Future<void> pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes();
       setState(() {
-        selectedImage = File(pickedFile.path);
+        selectedImage = pickedFile;
+        imageBytes = bytes;
       });
     }
   }
@@ -40,8 +43,8 @@ class _AddBookScreenState extends State<AddBookScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // 🔥 PREVIEW IMAGEN
-            if (selectedImage != null)
+            // PREVIEW IMAGEN
+            if (imageBytes != null)
               Center(
                 child: Container(
                   height: 220,
@@ -50,14 +53,14 @@ class _AddBookScreenState extends State<AddBookScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     image: DecorationImage(
-                      image: FileImage(selectedImage!),
+                      image: MemoryImage(imageBytes!),
                       fit: BoxFit.cover,
                     ),
                   ),
                 ),
               ),
 
-            // 🔥 BOTÓN SELECCIONAR IMAGEN
+            // BOTÓN SELECCIONAR IMAGEN
             ElevatedButton.icon(
               onPressed: pickImage,
               icon: const Icon(Icons.image),
@@ -77,9 +80,12 @@ class _AddBookScreenState extends State<AddBookScreen> {
               onPressed: () async {
                 String? imageUrl;
 
-                // 🔥 SUBIR IMAGEN SI EXISTE
-                if (selectedImage != null) {
-                  imageUrl = await provider.uploadImage(selectedImage!);
+                // SUBIR IMAGEN SI EXISTE
+                if (imageBytes != null && selectedImage != null) {
+                  final fileName =
+                      '${DateTime.now().millisecondsSinceEpoch}_${selectedImage!.name}';
+                  imageUrl =
+                      await provider.uploadImage(imageBytes!, fileName);
                 }
 
                 await provider.addBook(

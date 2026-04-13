@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -17,7 +17,8 @@ class _EditBookScreenState extends State<EditBookScreen> {
   final authorController = TextEditingController();
   final genreController = TextEditingController();
 
-  File? selectedImage;
+  XFile? selectedImage;
+  Uint8List? imageBytes;
   String? currentImageUrl;
 
   Future<void> pickImage() async {
@@ -25,8 +26,10 @@ class _EditBookScreenState extends State<EditBookScreen> {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes();
       setState(() {
-        selectedImage = File(pickedFile.path);
+        selectedImage = pickedFile;
+        imageBytes = bytes;
       });
     }
   }
@@ -53,8 +56,8 @@ class _EditBookScreenState extends State<EditBookScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            if (selectedImage != null)
-              _imagePreview(FileImage(selectedImage!))
+            if (imageBytes != null)
+              _imagePreview(MemoryImage(imageBytes!))
             else if (currentImageUrl != null && currentImageUrl!.isNotEmpty)
               _imagePreview(NetworkImage(currentImageUrl!)),
 
@@ -79,8 +82,11 @@ class _EditBookScreenState extends State<EditBookScreen> {
 
                 // Si el usuario seleccionó una imagen nueva, subirla primero
                 String? newCoverUrl = currentImageUrl;
-                if (selectedImage != null) {
-                  newCoverUrl = await provider.uploadImage(selectedImage!);
+                if (imageBytes != null && selectedImage != null) {
+                  final fileName =
+                      '${DateTime.now().millisecondsSinceEpoch}_${selectedImage!.name}';
+                  newCoverUrl =
+                      await provider.uploadImage(imageBytes!, fileName);
                 }
 
                 await provider.updateBook(

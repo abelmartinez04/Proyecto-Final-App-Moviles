@@ -1,8 +1,8 @@
+import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/book_model.dart';
 import '../models/category_model.dart';
 import '../models/user_book_model.dart';
-import 'dart:io';
 
 class DatabaseRepository {
   final SupabaseClient _client = Supabase.instance.client;
@@ -128,10 +128,8 @@ class DatabaseRepository {
     return UserBookModel.fromJson(response);
   }
 
-  Future<String> uploadImage(File file) async {
-    final fileName = DateTime.now().millisecondsSinceEpoch.toString();
-
-    await _client.storage.from('book-covers').upload(fileName, file);
+  Future<String> uploadImage(Uint8List bytes, String fileName) async {
+    await _client.storage.from('book-covers').uploadBinary(fileName, bytes);
 
     final publicUrl = _client.storage
         .from('book-covers')

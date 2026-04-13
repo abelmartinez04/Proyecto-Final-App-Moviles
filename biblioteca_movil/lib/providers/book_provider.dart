@@ -1,10 +1,10 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../models/book_model.dart';
 import '../models/category_model.dart';
 import '../models/user_book_model.dart';
 import '../repositories/database_repository.dart';
 import '../repositories/auth_repository.dart';
-import 'dart:io';
 
 class BookProvider extends ChangeNotifier {
   final DatabaseRepository _dbRepo;
@@ -123,8 +123,8 @@ class BookProvider extends ChangeNotifier {
     }
   }
 
-  Future<String> uploadImage(File file) {
-    return _dbRepo.uploadImage(file);
+  Future<String> uploadImage(Uint8List bytes, String fileName) {
+    return _dbRepo.uploadImage(bytes, fileName);
   }
 
   Future<void> updateBookStatus(String bookId, String status) async {

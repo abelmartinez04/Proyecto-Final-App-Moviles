@@ -218,13 +218,13 @@ class HomeScreen extends StatelessWidget {
             TextButton(
               onPressed: () async {
                 Navigator.pop(context);
+                await provider.deleteBook(bookId);
 
-                // 👇 aquí luego conectamos con DB real
-                // await provider.deleteBook(bookId);
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Libro eliminado (demo) 🗑️")),
-                );
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Libro eliminado 🗑️")),
+                  );
+                }
               },
               child: const Text(
                 "Eliminar",

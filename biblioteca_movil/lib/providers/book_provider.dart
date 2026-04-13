@@ -140,6 +140,48 @@ class BookProvider extends ChangeNotifier {
     }
   }
 
+  // Actualizar un libro completo (título, autor, categoría, portada, etc.)
+  Future<void> updateBook({
+    required String bookId,
+    String? title,
+    String? authorName,
+    String? categoryName,
+    String? coverUrl,
+    String? bookUrl,
+    String? status,
+  }) async {
+    try {
+      final updatedBook = await _dbRepo.updateBook(
+        bookId: bookId,
+        title: title,
+        authorName: authorName,
+        categoryName: categoryName,
+        coverUrl: coverUrl,
+        bookUrl: bookUrl,
+        status: status,
+      );
+      final index = _publicBooks.indexWhere((b) => b.id == bookId);
+      if (index != -1) {
+        _publicBooks[index] = updatedBook;
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint("Error updating book: $e");
+    }
+  }
+
+  // Eliminar un libro del catálogo
+  Future<void> deleteBook(String bookId) async {
+    try {
+      await _dbRepo.deleteBook(bookId);
+      _publicBooks.removeWhere((b) => b.id == bookId);
+      _filteredBooks.removeWhere((b) => b.id == bookId);
+      notifyListeners();
+    } catch (e) {
+      debugPrint("Error deleting book: $e");
+    }
+  }
+
   List<BookModel> _filteredBooks = [];
   String _searchQuery = '';
 

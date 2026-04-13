@@ -164,4 +164,79 @@ class DatabaseRepository {
   Future<void> deleteUserBook(String userBookId) async {
     await _client.from('user_books').delete().eq('id', userBookId);
   }
+
+  // Actualizar un libro completo (título, autor, categoría, portada, bookUrl, status)
+  Future<BookModel> updateBook({
+    required String bookId,
+    String? title,
+    String? authorName,
+    String? categoryName,
+    String? coverUrl,
+    String? bookUrl,
+    String? status,
+  }) async {
+    // 1. Actualizar campos directos del libro
+    final updates = <String, dynamic>{};
+    if (title != null && title.isNotEmpty) updates['title'] = title;
+    if (coverUrl != null) updates['cover_url'] = coverUrl;
+    if (bookUrl != null) updates['book_url'] = bookUrl;
+    if (status != null) updates['status'] = status;
+
+    if (updates.isNotEmpty) {
+      await _client.from('books').update(updates).eq('id', bookId);
+    }
+
+    // 2. Actualizar autor: borrar vínculo viejo y crear el nuevo
+    if (authorName != null) {
+      await _client.from('book_authors').delete().eq('book_id', bookId);
+      if (authorName.isNotEmpty) {
+        await _client.from('authors').upsert(
+          {'name': authorName},
+          onConflict: 'name',
+        );
+        final authorResponse = await _client
+            .from('authors')
+            .select('id')
+            .eq('name', authorName)
+            .single();
+        await _client.from('book_authors').insert({
+          'book_id': bookId,
+          'author_id': authorResponse['id'],
+        });
+      }
+    }
+
+    // 3. Actualizar categoría: borrar vínculo viejo y crear el nuevo
+    if (categoryName != null) {
+      await _client.from('book_categories').delete().eq('book_id', bookId);
+      if (categoryName.isNotEmpty) {
+        await _client.from('categories').upsert(
+          {'name': categoryName},
+          onConflict: 'name',
+        );
+        final categoryResponse = await _client
+            .from('categories')
+            .select('id')
+            .eq('name', categoryName)
+            .single();
+        await _client.from('book_categories').insert({
+          'book_id': bookId,
+          'category_id': categoryResponse['id'],
+        });
+      }
+    }
+
+    // 4. Devolver el libro actualizado con relaciones
+    final fullBook = await _client
+        .from('books')
+        .select('*, authors(*), categories(*)')
+        .eq('id', bookId)
+        .single();
+    return BookModel.fromJson(fullBook);
+  }
+
+  // Eliminar un libro del catálogo (CASCADE borra book_authors y book_categories automáticamente)
+  Future<void> deleteBook(String bookId) async {
+    await _client.from('books').delete().eq('id', bookId);
+  }
 }

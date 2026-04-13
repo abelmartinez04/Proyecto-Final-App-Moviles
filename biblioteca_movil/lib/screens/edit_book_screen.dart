@@ -74,11 +74,27 @@ class _EditBookScreenState extends State<EditBookScreen> {
 
             ElevatedButton(
               onPressed: () async {
+                final book =
+                    ModalRoute.of(context)!.settings.arguments as BookModel;
+
+                // Si el usuario seleccionó una imagen nueva, subirla primero
+                String? newCoverUrl = currentImageUrl;
                 if (selectedImage != null) {
-                  await provider.uploadImage(selectedImage!);
+                  newCoverUrl = await provider.uploadImage(selectedImage!);
                 }
 
+                await provider.updateBook(
+                  bookId: book.id,
+                  title: titleController.text,
+                  authorName: authorController.text,
+                  categoryName: genreController.text,
+                  coverUrl: newCoverUrl,
+                );
+
                 if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Libro actualizado ✅")),
+                  );
                   Navigator.pop(context);
                 }
               },
